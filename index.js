@@ -17,7 +17,8 @@ const
 
 let prepGulpPaths = require('./lib/GulpPaths'),
     prepareEntry = require('./lib/EntryPaths'),
-    saveFiles = require('./lib/SaveFiles');
+    saveFiles = require('./lib/SaveFiles'),
+    isWatch = require('./lib/IsWatch');
 
 elixir.extend(taskName, function (src, options, vendorLibs, globalVars) {
     let paths = prepGulpPaths(src),
@@ -61,12 +62,3 @@ elixir.extend(taskName, function (src, options, vendorLibs, globalVars) {
     })
         .watch(path.join(paths.src.baseDir, '**/*'));
 });
-
-/**
- * Check if watch task is active
- *
- * @returns {boolean}
- */
-let isWatch = () => {
-    return !_.isUndefined(gulp.tasks.watch.done);
-};
