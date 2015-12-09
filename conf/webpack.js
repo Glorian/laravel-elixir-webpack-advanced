@@ -7,6 +7,7 @@ const
     webpack = require('webpack'),
     rimraf = require('rimraf'),
     isWatch = require('../lib/IsWatch'),
+    BowerWebpackPlugin = require('bower-webpack-plugin'),
     ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 let filename = '[name].js',
@@ -26,7 +27,10 @@ const webpack_config = {
             }
         }),
         new webpack.NoErrorsPlugin(),
-        new ExtractTextPlugin('[name].css', {allChunks: true})
+        new ExtractTextPlugin('[name].css', {allChunks: true}),
+        new BowerWebpackPlugin({
+            excludes: [/.*\.less$/, /^.+\/[^\/]+\/?\*$/]
+        })
     ],
     resolve: {
         extensions: ['', '.js']
@@ -67,22 +71,20 @@ const webpack_config = {
                 loader: ExtractTextPlugin.extract(['css', 'autoprefixer?browsers=last 2 versions', 'resolve-url', 'sass?sourceMap'])
             },
             {
-                test: /\.(png|jpg|svg|ttf|eot|woff|woff2)$/,
+                test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)$/,
                 include: /\/(node_modules|bower_components)\//,
-                loader: 'url',
+                loader: 'file',
                 query: {
-                    name: '[1].[ext]',
-                    limit: 4096,
-                    regExp: /(node_modules|bower_components)\/(.*)/
+                    name: '[2]',
+                    regExp: '(node_modules|bower_components)/(.*)'
                 }
             },
             {
-                test: /\.(png|jpg|svg|ttf|eot|woff|woff2)$/,
+                test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)$/,
                 exclude: /\/(node_modules|bower_components)\//,
-                loader: 'url',
+                loader: 'file',
                 query: {
-                    name: '[path][name].[ext]',
-                    limit: 4096
+                    name: '[path][name].[ext]'
                 }
             }
         ]
