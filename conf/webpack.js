@@ -5,7 +5,6 @@ const
     webpack = require('webpack'),
     _ = require('underscore'),
     root = require('app-root-path'),
-    rimraf = require('rimraf'),
     ExtractTextPlugin = require('extract-text-webpack-plugin'),
     path = require('path');
 
@@ -26,12 +25,7 @@ const webpack_config = {
             }
         }),
         new webpack.NoErrorsPlugin(),
-        new ExtractTextPlugin('[name].css', {allChunks: true}),
-        {
-            apply: compiler => {
-                rimraf.sync(compiler.options.output.path)
-            }
-        }
+        new ExtractTextPlugin('[name].css', {allChunks: true})
     ],
     resolve: {
         extensions: ['', '.js']
