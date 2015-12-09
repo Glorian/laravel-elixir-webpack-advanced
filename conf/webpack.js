@@ -1,12 +1,13 @@
 "use strict";
 
 const
+    path = require('path'),
+    root = require('app-root-path'),
     elixir = require('laravel-elixir'),
     webpack = require('webpack'),
-    _ = require('underscore'),
-    root = require('app-root-path'),
-    ExtractTextPlugin = require('extract-text-webpack-plugin'),
-    path = require('path');
+    rimraf = require('rimraf'),
+    isWatch = require('../lib/IsWatch'),
+    ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 let filename = '[name].js',
     config = elixir.config;
@@ -103,5 +104,21 @@ if (config.production) {
         })
     );
 }
+
+/**
+ * Switching on specific plugin(s) when webpack task
+ * triggered in standalone mode "gulp webpack" or simple "gulp"
+ */
+if (! isWatch()) {
+    webpack_config.plugins.push(
+        // Autoclean plugin
+        {
+            apply: compiler => {
+                rimraf.sync(compiler.options.output.path)
+            }
+        }
+    );
+}
+
 
 module.exports = webpack_config;
