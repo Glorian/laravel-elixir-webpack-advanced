@@ -4,6 +4,7 @@ const
     _ = require('lodash'),
     path = require('path'),
     gulp = require('gulp'),
+    through = require('through2'),
     elixir = require('laravel-elixir'),
     webpack = require('webpack-stream'),
     webpackCompiler = require('webpack'),
@@ -20,19 +21,15 @@ let prepGulpPaths = require('./lib/GulpPaths'),
     saveFiles = require('./lib/SaveFiles'),
     isWatch = require('./lib/IsWatch');
 
-elixir.extend(taskName, function (src, options, vendorLibs, globalVars) {
+elixir.extend(taskName, function (src, options, globalVars) {
     let paths = prepGulpPaths(src),
         entry = prepareEntry(src);
-
-    if (_.isArray(vendorLibs)) {
-        entry.vendor = vendorLibs;
-    }
 
     if (_.isPlainObject(globalVars)) {
         webpack_config.plugins.push(new webpackCompiler.ProvidePlugin(globalVars));
     }
 
-    options = _.assign(webpack_config, options, {entry, watch: isWatch()});
+    options = _.defaultsDeep(webpack_config, options, {entry, watch: isWatch()});
 
     new elixir.Task(taskName, function () {
         let taskName = _.capitalize(this.name);
@@ -42,7 +39,6 @@ elixir.extend(taskName, function (src, options, vendorLibs, globalVars) {
         return (
             gulp
                 .src(paths.src.path)
-                .pipe($.if(config.sourcemaps, sourcemaps.init()))
                 .pipe(webpack(options, null, (err, stats) => {
                     $.util.log(this.name, stats.toString({
                         colors: true
@@ -55,10 +51,29 @@ elixir.extend(taskName, function (src, options, vendorLibs, globalVars) {
 
                     this.emit('end');
                 })
+                .pipe($.if(config.sourcemaps, sourcemaps.init({loadMaps: true})))
+                .pipe($.if(config.sourcemaps, through.obj(function(file, enc, cb) {
+                    let isSourceMap = /\.map$/.test(file.path);
+
+                    if (! isSourceMap.sourcemaps) {
+                        this.push(file);
+                    }
+
+                    cb();
+                })))
                 .pipe($.if(config.sourcemaps, sourcemaps.write('.')))
                 .pipe(gulp.dest(paths.output.baseDir))
                 .pipe(new elixir.Notification(`${taskName} Compiled!`))
         );
-    })
-        .watch(path.join(paths.src.baseDir, '**/*'));
+    });
+
+
+    /**
+     * If watch task is triggered, then we should start webpack task only once
+     * in watch mode
+     */
+    if (isWatch()) {
+        elixir.Task.find(taskName).run();
+    }
+
 });
