@@ -29,25 +29,24 @@ elixir(function(mix) {
 
 First argument is the entry point[s] of your application _(default directory is resources/assets/js)_. 
 In second argument you could pass webpack options. In production bundle will be compressed. 
-Third argument - define vendor libs. They would store in `vendor.js` entry point.
-Fourth argument - object for [webpack.ProvidePlugin](https://webpack.github.io/docs/list-of-plugins.html#provideplugin).
+Third argument - object for [webpack.ProvidePlugin](https://webpack.github.io/docs/list-of-plugins.html#provideplugin).
 
 #### Advanced example
 
 ```javascript
 elixir(function(mix) {
     mix.webpack(
-        { bundle: "app.js" }, 
+        { bundle: 'app.js', vendor: ['jquery'] }, 
         {
 	        outputDir: "public/js",
 	        output: {
 	            filename: "bundle.js"
             }
         }, 
-        ['jquery'], 
         {
             $: 'jquery',
-            jQuery: 'jquery'
+            jQuery: 'jquery',
+            'window.jQuery': 'jquery'
         }
     );
 });
