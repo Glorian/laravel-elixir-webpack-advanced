@@ -37,17 +37,17 @@ Fourth argument - object for [webpack.ProvidePlugin](https://webpack.github.io/d
 ```javascript
 elixir(function(mix) {
     mix.webpack(
-        { bundle: "app.js" }, 
+        { bundle: 'app.js', vendor: ['jquery'] }, 
         {
 	        outputDir: "public/js",
 	        output: {
 	            filename: "bundle.js"
             }
         }, 
-        ['jquery'], 
         {
             $: 'jquery',
-            jQuery: 'jquery'
+            jQuery: 'jquery',
+            'window.jQuery': 'jquery'
         }
     );
 });
