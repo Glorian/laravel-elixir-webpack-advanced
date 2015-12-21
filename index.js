@@ -29,7 +29,7 @@ elixir.extend(taskName, function (src, options, globalVars) {
         webpack_config.plugins.push(new webpackCompiler.ProvidePlugin(globalVars));
     }
 
-    options = _.defaultsDeep(webpack_config, options, {entry, watch: isWatch()});
+    options = _.merge(webpack_config, options, {entry, watch: isWatch()});
 
     new elixir.Task(taskName, function () {
         let taskName = _.capitalize(this.name);
