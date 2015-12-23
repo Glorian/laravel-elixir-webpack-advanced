@@ -71,6 +71,10 @@ const webpack_config = {
                 loader: ExtractTextPlugin.extract(['css', 'autoprefixer?browsers=last 2 versions', 'resolve-url', 'sass?sourceMap'])
             },
             {
+                test: /\.html$/,
+                loader: 'html'
+            },
+            {
                 test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)$/,
                 include: /\/(node_modules|bower_components)\//,
                 loader: 'file',
@@ -121,6 +125,5 @@ if (! isWatch()) {
         }
     );
 }
-
 
 module.exports = webpack_config;
