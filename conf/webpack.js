@@ -72,7 +72,7 @@ const webpack_config = {
             },
             {
                 test: /\.html$/,
-                loader: 'html'
+                loader: 'vue-html'
             },
             {
                 test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)$/,
