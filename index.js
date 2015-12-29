@@ -72,8 +72,6 @@ elixir.extend(taskName, function (src, options, globalVars) {
      * If watch task is triggered, then we should start webpack task only once
      * in watch mode
      */
-    if (isWatch()) {
-        elixir.Task.find(taskName).run();
-    }
+    isWatch() && elixir.Task.find(taskName).run();
 
 });
