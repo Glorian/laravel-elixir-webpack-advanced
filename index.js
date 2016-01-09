@@ -4,7 +4,6 @@ const
     _ = require('lodash'),
     path = require('path'),
     gulp = require('gulp'),
-    through = require('through2'),
     elixir = require('laravel-elixir'),
     webpack = require('webpack-stream'),
     webpackCompiler = require('webpack'),
@@ -13,7 +12,6 @@ const
 
 const
     $ = elixir.Plugins,
-    config = elixir.config,
     taskName = 'webpack';
 
 let prepGulpPaths = require('./lib/GulpPaths'),
@@ -51,17 +49,6 @@ elixir.extend(taskName, function (src, options, globalVars) {
 
                     this.emit('end');
                 })
-                .pipe($.if(config.sourcemaps, sourcemaps.init({loadMaps: true})))
-                .pipe($.if(config.sourcemaps, through.obj(function(file, enc, cb) {
-                    let isSourceMap = /\.map$/.test(file.path);
-
-                    if (! isSourceMap.sourcemaps) {
-                        this.push(file);
-                    }
-
-                    cb();
-                })))
-                .pipe($.if(config.sourcemaps, sourcemaps.write('.')))
                 .pipe(gulp.dest(paths.output.baseDir))
                 .pipe(new elixir.Notification(`${taskName} Compiled!`))
         );
