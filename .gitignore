@@ -1,5 +1,6 @@
 .idea
 gulpfile.js
+bower.json
 node_modules/
 bower_components/
 test_project/
