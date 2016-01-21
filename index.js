@@ -7,7 +7,6 @@ const
     elixir = require('laravel-elixir'),
     webpack = require('webpack-stream'),
     webpackCompiler = require('webpack'),
-    sourcemaps = require('gulp-sourcemaps'),
     webpack_config = require('./conf/webpack');
 
 const

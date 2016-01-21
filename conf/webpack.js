@@ -1,14 +1,18 @@
 "use strict";
 
+// Main modules
 const
     path = require('path'),
+    rimraf = require('rimraf'),
+    webpack = require('webpack'),
     root = require('app-root-path'),
     elixir = require('laravel-elixir'),
-    webpack = require('webpack'),
-    rimraf = require('rimraf'),
-    isWatch = require('../lib/IsWatch'),
+    autoprefixer = require('autoprefixer'),
     BowerWebpackPlugin = require('bower-webpack-plugin'),
     ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+// Build in modules
+const isWatch = require('../lib/IsWatch');
 
 let filename = '[name].js',
     config = elixir.config;
@@ -60,15 +64,15 @@ const webpack_config = {
             },
             {
                 test: /\.styl$/,
-                loader: ExtractTextPlugin.extract(['css', 'autoprefixer?browsers=last 2 versions', 'stylus?resolve url'])
+                loader: ExtractTextPlugin.extract(['css', 'postcss', 'stylus?resolve url'])
             },
             {
                 test: /\.css$/,
-                loader: ExtractTextPlugin.extract(['css', 'autoprefixer?browsers=last 2 versions', 'resolve-url'])
+                loader: ExtractTextPlugin.extract(['css', 'postcss', 'resolve-url'])
             },
             {
                 test: /\.(sass|scss)$/,
-                loader: ExtractTextPlugin.extract(['css', 'autoprefixer?browsers=last 2 versions', 'resolve-url', 'sass?sourceMap'])
+                loader: ExtractTextPlugin.extract(['css', 'postcss', 'resolve-url', 'sass?sourceMap'])
             },
             {
                 test: /\.html$/,
@@ -92,6 +96,9 @@ const webpack_config = {
                 }
             }
         ]
+    },
+    postcss() {
+        return [autoprefixer({ browsers: ['last 2 versions'] })];
     }
 };
 
