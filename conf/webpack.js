@@ -8,6 +8,7 @@ const
     root = require('app-root-path'),
     elixir = require('laravel-elixir'),
     autoprefixer = require('autoprefixer'),
+    WebpackNotifierPlugin = require('webpack-notifier'),
     BowerWebpackPlugin = require('bower-webpack-plugin'),
     ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -34,6 +35,11 @@ const webpack_config = {
         new ExtractTextPlugin('[name].css', {allChunks: true}),
         new BowerWebpackPlugin({
             excludes: [/.*\.less$/, /^.+\/[^\/]+\/?\*$/]
+        }),
+        new WebpackNotifierPlugin({
+            excludeWarnings: true,
+            title: 'Laravel Elixir',
+            contentImage: path.resolve(root.path, 'node_modules', 'laravel-elixir', 'icons', 'laravel.png')
         })
     ],
     resolve: {
