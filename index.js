@@ -12,22 +12,6 @@ const
     $ = elixir.Plugins,
     taskName = 'webpack';
 
-const statsOptions = {
-    colors: $.util.colors.supportsColor,
-    hash: false,
-    timings: false,
-    chunks: false,
-    chunkModules: false,
-    modules: false,
-    children: true,
-    version: true,
-    cached: false,
-    cachedAssets: false,
-    reasons: false,
-    source: false,
-    errorDetails: false
-};
-
 let prepGulpPaths = require('./lib/GulpPaths'),
     prepareEntry = require('./lib/EntryPaths'),
     saveFiles = require('./lib/SaveFiles'),
@@ -38,10 +22,10 @@ elixir.extend(taskName, function (src, options, globalVars) {
         entry = prepareEntry(src);
 
     if (_.isPlainObject(globalVars)) {
-        webpack_config.plugins.push(new webpackCompiler.ProvidePlugin(globalVars));
+        webpack_config.plugins.push(new webpack.ProvidePlugin(globalVars));
     }
 
-    options = _.merge(webpack_config, options, {entry, watch: isWatch(), stats: {colors: true}});
+    options = _.merge(webpack_config, options, {entry, watch: isWatch()});
 
     new elixir.Task(taskName, function () {
         this.log(paths.src, saveFiles(src, paths));
@@ -51,15 +35,13 @@ elixir.extend(taskName, function (src, options, globalVars) {
                 return;
             }
 
-            $.util.log(stats.toString(options.stats));
+            $.util.log(stats.toString(webpack_config.stats));
         });
     });
-
 
     /**
      * If watch task is triggered, then we should start webpack task only once
      * in watch mode
      */
     isWatch() && elixir.Task.find(taskName).run();
-
 });

@@ -7,16 +7,22 @@ const
     webpack = require('webpack'),
     root = require('app-root-path'),
     elixir = require('laravel-elixir'),
-    autoprefixer = require('autoprefixer'),
+    AutoPrefixer = require('autoprefixer'),
     WebpackNotifierPlugin = require('webpack-notifier'),
     BowerWebpackPlugin = require('bower-webpack-plugin'),
     ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 // Build in modules
-const isWatch = require('../lib/IsWatch');
+const
+    isWatch = require('../lib/IsWatch'),
+    ManifestRevisionPlugin = require('../lib/RevManifestPlugin');
 
-let filename = '[name].js',
-    config = elixir.config;
+const
+    config = elixir.config,
+    $ = elixir.Plugins,
+    filenamePattern = config.production
+        ? '[name]-[hash]'
+        : '[name]';
 
 const webpack_config = {
     debug: !config.production,
@@ -24,7 +30,7 @@ const webpack_config = {
     plugins: [
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
-            filename
+            filename: `${filenamePattern}.js`
         }),
         new webpack.DefinePlugin({
             'process.env': {
@@ -32,7 +38,7 @@ const webpack_config = {
             }
         }),
         new webpack.NoErrorsPlugin(),
-        new ExtractTextPlugin('[name].css', {allChunks: true}),
+        new ExtractTextPlugin(`${filenamePattern}.css`, {allChunks: true}),
         new BowerWebpackPlugin({
             excludes: [/.*\.less$/, /^.+\/[^\/]+\/?\*$/]
         }),
@@ -48,7 +54,7 @@ const webpack_config = {
     output: {
         path: path.resolve(root.path, config.get('public.js.outputFolder')),
         publicPath: `/${config.js.outputFolder}/`,
-        filename
+        filename: `${filenamePattern}.js`
     },
     resolveLoader: {
         root: path.join(root.path, 'node_modules'),
@@ -57,6 +63,9 @@ const webpack_config = {
         extensions: ['', '.js']
     },
     devtool: !config.production ? 'cheap-module-source-map' : null,
+    watchOptions: {
+        aggregateTimeout: 100
+    },
     module: {
         loaders: [
             {
@@ -98,13 +107,16 @@ const webpack_config = {
                 exclude: /\/(node_modules|bower_components)\//,
                 loader: 'file',
                 query: {
-                    name: '[path][name].[ext]'
+                    name: `[path]${filenamePattern}.[ext]`
                 }
             }
         ]
     },
+    stats: {
+        colors: $.util.colors.supportsColor
+    },
     postcss() {
-        return [autoprefixer({ browsers: ['last 2 versions'] })];
+        return [AutoPrefixer({browsers: ['last 2 versions']})];
     }
 };
 
@@ -112,14 +124,53 @@ const webpack_config = {
  * Production Environment
  */
 if (config.production) {
+    // Output stats
+    webpack_config.stats = Object.assign(
+        webpack_config.stats,
+        {
+            hash: false,
+            timings: false,
+            chunks: false,
+            chunkModules: false,
+            modules: false,
+            children: true,
+            version: true,
+            cached: false,
+            cachedAssets: false,
+            reasons: false,
+            source: false,
+            errorDetails: false
+        }
+    );
+
+    // Optimization plugins
     webpack_config.plugins.push(
         new webpack.optimize.DedupePlugin(),
+        new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({
             compress: {
                 warnings: false,
                 drop_console: true,
                 unsafe: true
             }
+        }),
+        new ManifestRevisionPlugin(
+            webpack_config.output.publicPath,
+            config.publicPath
+        )
+    );
+}
+
+/**
+ * Development mode only
+ */
+if (! config.production) {
+    webpack_config.plugins.push(
+        // Progress
+        new webpack.ProgressPlugin((percentage, msg) => {
+            elixir.Log.message(
+                `${$.util.colors.green(`${(percentage * 100)}%`)} ---> ${$.util.colors.blue(msg)}`
+            );
         })
     );
 }
@@ -128,9 +179,10 @@ if (config.production) {
  * Switching on specific plugin(s) when webpack task
  * triggered in standalone mode "gulp webpack" or simple "gulp"
  */
-if (! isWatch()) {
-    webpack_config.plugins.push(
-        // Autoclean plugin
+if (!isWatch()) {
+    // [should be the first in plugins array]
+    webpack_config.plugins.unshift(
+        // AutoClean plugin
         {
             apply: compiler => {
                 rimraf.sync(compiler.options.output.path)
