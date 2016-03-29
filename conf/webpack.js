@@ -12,7 +12,7 @@ const
     BowerWebpackPlugin = require('bower-webpack-plugin'),
     ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-// Build in modules
+// Built-in modules
 const
     isWatch = require('../lib/IsWatch'),
     ManifestRevisionPlugin = require('../lib/RevManifestPlugin');
@@ -168,8 +168,10 @@ if (! config.production) {
     webpack_config.plugins.push(
         // Progress
         new webpack.ProgressPlugin((percentage, msg) => {
+            percentage = Math.round(percentage * 100);
+
             elixir.Log.message(
-                `${$.util.colors.green(`${(percentage * 100)}%`)} ---> ${$.util.colors.blue(msg)}`
+                `${$.util.colors.green(`${percentage}%`)} ---> ${$.util.colors.blue(msg)}`
             );
         })
     );
