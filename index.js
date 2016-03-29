@@ -25,7 +25,11 @@ elixir.extend(taskName, function (src, options, globalVars) {
         webpack_config.plugins.push(new webpack.ProvidePlugin(globalVars));
     }
 
-    options = _.merge(webpack_config, options, {entry, watch: isWatch()});
+    options = _.mergeWith(webpack_config, options, {entry, watch: isWatch()}, (objValue, srcValue) => {
+        if (_.isArray(objValue)) {
+            return objValue.concat(srcValue);
+        }
+    });
 
     new elixir.Task(taskName, function () {
         this.log(paths.src, saveFiles(src, paths));
