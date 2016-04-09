@@ -15,12 +15,13 @@ const
 // Built-in modules
 const
     isWatch = require('../lib/IsWatch'),
+    isVersioning = require('../lib/IsVersioning'),
     ManifestRevisionPlugin = require('../lib/RevManifestPlugin');
 
 const
     config = elixir.config,
     $ = elixir.Plugins,
-    filenamePattern = config.production
+    filenamePattern = isVersioning()
         ? '[name]-[hash]'
         : '[name]';
 
@@ -62,7 +63,6 @@ const webpack_config = {
         moduleTemplates: ['*-loader', '*'],
         extensions: ['', '.js']
     },
-    devtool: !config.production ? 'cheap-module-source-map' : null,
     watchOptions: {
         aggregateTimeout: 100
     },
@@ -124,6 +124,8 @@ const webpack_config = {
  * Production Environment
  */
 if (config.production) {
+    webpack_config.devtool = null;
+
     // Output stats
     webpack_config.stats = Object.assign(
         webpack_config.stats,
@@ -153,18 +155,16 @@ if (config.production) {
                 drop_console: true,
                 unsafe: true
             }
-        }),
-        new ManifestRevisionPlugin(
-            webpack_config.output.publicPath,
-            config.publicPath
-        )
+        })
     );
 }
 
 /**
  * Development mode only
  */
-if (! config.production) {
+if (!config.production) {
+    webpack_config.devtool = 'cheap-module-eval-source-map';
+
     webpack_config.plugins.push(
         // Progress
         new webpack.ProgressPlugin((percentage, msg) => {
@@ -174,6 +174,27 @@ if (! config.production) {
                 `${$.util.colors.green(`${percentage}%`)} ---> ${$.util.colors.blue(msg)}`
             );
         })
+    );
+}
+
+/**
+ * If versioning is enabled then change destination path
+ */
+if (isVersioning()) {
+    // Versioning files should be in version build folder
+    webpack_config.output.path = path.resolve(
+        root.path,
+        config.publicPath,
+        config.versioning.buildFolder,
+        config.js.outputFolder
+    );
+
+    // Versioning plugin
+    webpack_config.plugins.push(
+        new ManifestRevisionPlugin(
+            webpack_config.output.publicPath,
+            config.get('public.versioning.buildFolder')
+        )
     );
 }
 
