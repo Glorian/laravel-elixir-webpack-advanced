@@ -16,6 +16,9 @@
   "author": {
     "name": "Igor Malyshev"
   },
+  "engines": {
+    "node": ">=4.4.0"
+  },
   "license": "MIT",
   "dependencies": {
     "app-root-path": "^1.0.0",
