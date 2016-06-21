@@ -15,24 +15,23 @@ const
  */
 const
     $ = elixir.Plugins,
-    config = elixir.config,
     taskName = 'webpack';
 
 /**
  * Built-in modules
  */
 const
-    prepGulpPaths = require('./lib/GulpPaths'),
+    {GulpPaths, versionPath} = require('./lib/GulpPaths'),
     isVersioning = require('./lib/IsVersioning'),
     prepareEntry = require('./lib/EntryPaths'),
-    saveFiles = require('./lib/SaveFiles'),
     isWatch = require('./lib/IsWatch');
 
 /**
  * Webpack spec
  */
 elixir.extend(taskName, function (src, options, globalVars) {
-    let paths = prepGulpPaths(src),
+    let paths = GulpPaths(src),
+        globalConfig = Object.assign({}, webpack_config),
         entry = prepareEntry(src);
 
     /**
@@ -45,7 +44,7 @@ elixir.extend(taskName, function (src, options, globalVars) {
 
     // Merge options
     options = _.mergeWith(
-        webpack_config,
+        globalConfig,
         options,
         {entry, watch: isWatch()},
         (objValue, srcValue) => {
@@ -56,23 +55,14 @@ elixir.extend(taskName, function (src, options, globalVars) {
     );
 
     if (isVersioning()) {
-        options.output.publicPath = options.output.publicPath
-
-            // Add leading slash if missing
-            .replace(/^\/?/, '/')
-
-            // insert build folder before js output
-            .replace(
-                new RegExp(config.js.outputFolder),
-                `${config.versioning.buildFolder}/${config.js.outputFolder}`
-            );
+        options.output.publicPath = versionPath(options.output.publicPath);
     }
 
     /**
      * Webpack task
      */
     new elixir.Task(taskName, function () {
-        this.log(paths.src, saveFiles(src, paths));
+        this.recordStep('Building js files');
 
         webpack(options, (err, stats) => {
             if (err) {
@@ -81,7 +71,7 @@ elixir.extend(taskName, function (src, options, globalVars) {
 
             $.util.log(stats.toString(webpack_config.stats));
         });
-    });
+    }, paths);
 
     /**
      * If watch task is triggered, then we should start webpack task only once
