@@ -10,6 +10,7 @@ const
     AutoPrefixer = require('autoprefixer'),
     WebpackNotifierPlugin = require('webpack-notifier'),
     BowerWebpackPlugin = require('bower-webpack-plugin'),
+    ProgressBarPlugin = require('progress-bar-webpack-plugin'),
     ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 // Built-in modules
@@ -135,8 +136,7 @@ if (config.production) {
             chunks: false,
             chunkModules: false,
             modules: false,
-            children: true,
-            version: true,
+            children: false,
             cached: false,
             cachedAssets: false,
             reasons: false,
@@ -166,14 +166,7 @@ if (!config.production) {
     webpack_config.devtool = 'cheap-module-eval-source-map';
 
     webpack_config.plugins.push(
-        // Progress
-        new webpack.ProgressPlugin((percentage, msg) => {
-            percentage = Math.round(percentage * 100);
-
-            elixir.Log.message(
-                `${$.util.colors.green(`${percentage}%`)} ---> ${$.util.colors.blue(msg)}`
-            );
-        })
+        new ProgressBarPlugin()
     );
 }
 
