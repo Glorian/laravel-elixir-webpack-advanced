@@ -23,8 +23,7 @@ const
 const
     {GulpPaths, versionPath} = require('./lib/GulpPaths'),
     isVersioning = require('./lib/IsVersioning'),
-    prepareEntry = require('./lib/EntryPaths'),
-    isWatch = require('./lib/IsWatch');
+    prepareEntry = require('./lib/EntryPaths');
 
 /**
  * Webpack spec
@@ -46,7 +45,7 @@ elixir.extend(taskName, function (src, options, globalVars) {
     options = _.mergeWith(
         globalConfig,
         options,
-        {entry, watch: isWatch()},
+        {entry, watch: elixir.isWatching()},
         (objValue, srcValue) => {
             if (_.isArray(objValue)) {
                 return objValue.concat(srcValue);
@@ -72,10 +71,4 @@ elixir.extend(taskName, function (src, options, globalVars) {
             $.util.log(stats.toString(webpack_config.stats));
         });
     }, paths);
-
-    /**
-     * If watch task is triggered, then we should start webpack task only once
-     * in watch mode
-     */
-    isWatch() && elixir.Task.find(taskName).run();
 });
