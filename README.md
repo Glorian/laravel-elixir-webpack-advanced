@@ -85,6 +85,10 @@ elixir(function(mix) {
 });
 ```
 
+## Things to do:
+* Implement HMR
+* Isolate inner configuration from mutation
+
 ## License
 
 MIT (http://www.opensource.org/licenses/mit-license.php)

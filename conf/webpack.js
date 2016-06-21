@@ -15,7 +15,6 @@ const
 
 // Built-in modules
 const
-    isWatch = require('../lib/IsWatch'),
     isVersioning = require('../lib/IsVersioning'),
     ManifestRevisionPlugin = require('../lib/RevManifestPlugin');
 
@@ -195,7 +194,7 @@ if (isVersioning()) {
  * Switching on specific plugin(s) when webpack task
  * triggered in standalone mode "gulp webpack" or simple "gulp"
  */
-if (!isWatch()) {
+if (!elixir.isWatching()) {
     // [should be the first in plugins array]
     webpack_config.plugins.unshift(
         // AutoClean plugin
