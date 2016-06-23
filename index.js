@@ -21,7 +21,7 @@ const
  * Built-in modules
  */
 const
-    {GulpPaths, versionPath} = require('./lib/GulpPaths'),
+    libPath = require('./lib/GulpPaths'),
     isVersioning = require('./lib/IsVersioning'),
     prepareEntry = require('./lib/EntryPaths');
 
@@ -29,7 +29,7 @@ const
  * Webpack spec
  */
 elixir.extend(taskName, function (src, options, globalVars) {
-    let paths = GulpPaths(src),
+    let paths = libPath.GulpPaths(src),
         globalConfig = Object.assign({}, webpack_config),
         entry = prepareEntry(src);
 
@@ -54,7 +54,7 @@ elixir.extend(taskName, function (src, options, globalVars) {
     );
 
     if (isVersioning()) {
-        options.output.publicPath = versionPath(options.output.publicPath);
+        options.output.publicPath = libPath.versionPath(options.output.publicPath);
     }
 
     /**
