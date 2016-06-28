@@ -70,7 +70,7 @@ const webpack_config = {
         loaders: [
             {
                 test: /\.jsx?$/,
-                include: path.resolve(root.path, config.get('assets.js.folder')),
+                exclude: /(node_modules|bower_components)/,
                 loader: 'babel',
                 query: {
                     presets: ['es2015'],
