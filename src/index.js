@@ -3,12 +3,18 @@
 /**
  * Require main dependencies
  */
-const
-    _ = require('lodash'),
-    path = require('path'),
-    webpack = require('webpack'),
-    elixir = require('laravel-elixir'),
-    webpack_config = require('./conf/webpack');
+import _ from 'lodash';
+import webpack from 'webpack';
+import elixir from 'laravel-elixir';
+import webpackConfig from './Config';
+
+/**
+ * Built-in modules
+ */
+import isWatch from './modules/IsWatch';
+import { GulpPaths, versionPath } from './modules/GulpPaths';
+import isVersion from './modules/IsVersioning';
+import prepareEntry from './modules/EntryPaths';
 
 /**
  * Helpers
@@ -18,19 +24,11 @@ const
     taskName = 'webpack';
 
 /**
- * Built-in modules
- */
-const
-    libPath = require('./lib/GulpPaths'),
-    isVersioning = require('./lib/IsVersioning'),
-    prepareEntry = require('./lib/EntryPaths');
-
-/**
  * Webpack spec
  */
 elixir.extend(taskName, function (src, options, globalVars) {
-    let paths = libPath.GulpPaths(src),
-        globalConfig = Object.assign({}, webpack_config),
+    let paths = GulpPaths(src),
+        globalConfig = Object.assign({}, webpackConfig),
         entry = prepareEntry(src);
 
     /**
@@ -38,14 +36,14 @@ elixir.extend(taskName, function (src, options, globalVars) {
      * TODO mark as deprecated
      */
     if (_.isPlainObject(globalVars)) {
-        webpack_config.plugins.push(new webpack.ProvidePlugin(globalVars));
+        webpackConfig.plugins.push(new webpack.ProvidePlugin(globalVars));
     }
 
     // Merge options
     options = _.mergeWith(
         globalConfig,
         options,
-        {entry, watch: elixir.isWatching()},
+        {entry, watch: isWatch()},
         (objValue, srcValue) => {
             if (_.isArray(objValue)) {
                 return objValue.concat(srcValue);
@@ -53,8 +51,8 @@ elixir.extend(taskName, function (src, options, globalVars) {
         }
     );
 
-    if (isVersioning()) {
-        options.output.publicPath = libPath.versionPath(options.output.publicPath);
+    if (isVersion()) {
+        options.output.publicPath = versionPath(options.output.publicPath);
     }
 
     /**
@@ -68,7 +66,7 @@ elixir.extend(taskName, function (src, options, globalVars) {
                 return;
             }
 
-            $.util.log(stats.toString(webpack_config.stats));
+            $.util.log(stats.toString(webpackConfig.stats));
         });
     }, paths);
 });

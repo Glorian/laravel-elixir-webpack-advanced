@@ -1,8 +1,7 @@
 "use strict";
 
-const
-    _ = require('lodash'),
-    path = require('path');
+import _ from 'lodash';
+import path from 'path';
 
 /**
  * Append relative path to entry points
@@ -10,7 +9,7 @@ const
  * @param {string|array|object} src
  * @returns {string|array|object}
  */
-module.exports = src => {
+export default src => {
     let prependPath = file => `./${file}`;
 
     if (_.isPlainObject(src)) {

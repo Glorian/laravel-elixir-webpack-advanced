@@ -1,11 +1,11 @@
 "use strict";
 
-const
-    _ = require('lodash'),
-    elixir = require('laravel-elixir'),
-    isVersioning = require('../lib/IsVersioning');
+import _ from 'lodash';
+import elixir from 'laravel-elixir';
+import isVersion from './IsVersioning';
 
-const config = elixir.config;
+const
+    config = elixir.config;
 
 /**
  * Prep the Gulp src and output paths.
@@ -14,7 +14,7 @@ const config = elixir.config;
  * @param {string|null}  baseDir
  * @param {string|null}  output
  */
-module.exports.GulpPaths = (src, baseDir, output) => {
+export const GulpPaths = (src, baseDir, output) => {
     baseDir = baseDir || config.get('assets.js.folder');
     output = output || config.get('public.js.outputFolder');
 
@@ -22,7 +22,7 @@ module.exports.GulpPaths = (src, baseDir, output) => {
         src = _.values(src);
     }
 
-    if (isVersioning()) {
+    if (isVersion()) {
         output = this.versionPath(output);
     }
 
@@ -31,7 +31,7 @@ module.exports.GulpPaths = (src, baseDir, output) => {
         .output(output);
 };
 
-module.exports.versionPath = outputPath => outputPath
+export const versionPath = outputPath => outputPath
     // Add leading slash if missing
     .replace(/^\/?/, '/')
     // insert build folder before js output

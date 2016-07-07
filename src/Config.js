@@ -1,27 +1,26 @@
 "use strict";
 
 // Main modules
-const
-    path = require('path'),
-    rimraf = require('rimraf'),
-    webpack = require('webpack'),
-    root = require('app-root-path'),
-    elixir = require('laravel-elixir'),
-    AutoPrefixer = require('autoprefixer'),
-    WebpackNotifierPlugin = require('webpack-notifier'),
-    BowerWebpackPlugin = require('bower-webpack-plugin'),
-    ProgressBarPlugin = require('progress-bar-webpack-plugin'),
-    ExtractTextPlugin = require('extract-text-webpack-plugin');
+import path from 'path';
+import rimraf from 'rimraf';
+import webpack from 'webpack';
+import root from 'app-root-path';
+import elixir from 'laravel-elixir';
+import AutoPrefixer from 'autoprefixer';
+import WebpackNotifierPlugin from 'webpack-notifier';
+import BowerWebpackPlugin from 'bower-webpack-plugin';
+import ProgressBarPlugin from 'progress-bar-webpack-plugin';
+import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
 // Built-in modules
-const
-    isVersioning = require('../lib/IsVersioning'),
-    ManifestRevisionPlugin = require('../lib/RevManifestPlugin');
+import isWatch from './modules/IsWatch';
+import isVersion from './modules/IsVersioning';
+import ManifestRevisionPlugin from './modules/RevManifestPlugin';
 
 const
     config = elixir.config,
     $ = elixir.Plugins,
-    filenamePattern = isVersioning()
+    filenamePattern = isVersion()
         ? '[name]-[hash]'
         : '[name]';
 
@@ -38,6 +37,7 @@ const webpack_config = {
                 'NODE_ENV': JSON.stringify(config.production ? 'production' : 'development')
             }
         }),
+        new ProgressBarPlugin(),
         new webpack.NoErrorsPlugin(),
         new ExtractTextPlugin(`${filenamePattern}.css`, {allChunks: true}),
         new BowerWebpackPlugin({
@@ -94,7 +94,7 @@ const webpack_config = {
                 loader: 'vue-html'
             },
             {
-                test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)$/,
+                test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)(\?.+)?$/,
                 include: /\/(node_modules|bower_components)\//,
                 loader: 'file',
                 query: {
@@ -163,16 +163,12 @@ if (config.production) {
  */
 if (!config.production) {
     webpack_config.devtool = 'cheap-module-eval-source-map';
-
-    webpack_config.plugins.push(
-        new ProgressBarPlugin()
-    );
 }
 
 /**
  * If versioning is enabled then change destination path
  */
-if (isVersioning()) {
+if (isVersion()) {
     // Versioning files should be in version build folder
     webpack_config.output.path = path.resolve(
         root.path,
@@ -194,7 +190,7 @@ if (isVersioning()) {
  * Switching on specific plugin(s) when webpack task
  * triggered in standalone mode "gulp webpack" or simple "gulp"
  */
-if (!elixir.isWatching()) {
+if (!isWatch()) {
     // [should be the first in plugins array]
     webpack_config.plugins.unshift(
         // AutoClean plugin
@@ -206,4 +202,4 @@ if (!elixir.isWatching()) {
     );
 }
 
-module.exports = webpack_config;
+export default webpack_config;

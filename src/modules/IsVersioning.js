@@ -10,4 +10,4 @@ const
  *
  * @returns {boolean}
  */
-module.exports = () => config.production && _.get(config, 'versioning.enabled', false);
+export default () => config.production && _.get(config, 'versioning.enabled', false);

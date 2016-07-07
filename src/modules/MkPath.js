@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * @author Jonathan Rajavuori <jrajav@gmail.com>
  * @licence MIT
@@ -5,9 +7,8 @@
  * Repository: https://github.com/jrajav/mkpath
  */
 
-const
-    fs = require('fs'),
-    path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Asynchronous creating dir
@@ -82,4 +83,4 @@ mkpath.sync = (dirpath, mode) => {
     }
 };
 
-module.exports = mkpath;
+export default mkpath;
