@@ -1,10 +1,10 @@
 "use strict";
 
-const
-    _ = require('lodash'),
-    fs = require('fs'),
-    path = require('path'),
-    mkpath = require('./MkPath');
+
+import _ from 'lodash';
+import fs from 'fs';
+import path from 'path';
+import mkpath from './MkPath';
 
 /**
  * Merging with exists manifest file
@@ -34,7 +34,7 @@ const mergeManifestFiles = (manifestObject, filePath) => {
  * @param filename
  * @returns {Function}
  */
-module.exports = function (publicPath, targetPath, filename) {
+export default function (publicPath, targetPath, filename) {
     filename = filename || 'rev-manifest.json';
     publicPath = publicPath.replace(/^\//, '');
 
