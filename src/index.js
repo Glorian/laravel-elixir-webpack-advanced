@@ -59,7 +59,7 @@ elixir.extend(taskName, function (src, options, globalVars) {
      * Webpack task
      */
     new elixir.Task(taskName, function () {
-        this.recordStep('Building js files');
+        this.recordStep !== undefined && this.recordStep('Building js files');
 
         webpack(options, (err, stats) => {
             if (err) {

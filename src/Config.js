@@ -14,6 +14,7 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
 // Built-in modules
 import isWatch from './modules/IsWatch';
+import isWindows from  './modules/isWindows';
 import isVersion from './modules/IsVersioning';
 import ManifestRevisionPlugin from './modules/RevManifestPlugin';
 
@@ -95,16 +96,16 @@ const webpack_config = {
             },
             {
                 test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)(\?.+)?$/,
-                include: /\/(node_modules|bower_components)\//,
+                include: /(\/|\\)(node_modules|bower_components)(\/|\\)/,
                 loader: 'file',
                 query: {
-                    name: '[2]',
+                    name: isWindows() ? `[path]${filenamePattern}.[ext]` : '[2]',
                     regExp: '(node_modules|bower_components)/(.*)'
                 }
             },
             {
-                test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)$/,
-                exclude: /\/(node_modules|bower_components)\//,
+                test: /\.(png|jpg|jpeg|gif|svg|ttf|eot|woff|woff2)(\?.+)?$/,
+                exclude: /(\/|\\)(node_modules|bower_components)(\/|\\)/,
                 loader: 'file',
                 query: {
                     name: `[path]${filenamePattern}.[ext]`
