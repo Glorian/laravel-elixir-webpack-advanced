@@ -5,29 +5,25 @@ import path from 'path';
 import rimraf from 'rimraf';
 import webpack from 'webpack';
 import root from 'app-root-path';
-import elixir from 'laravel-elixir';
+import gutils from 'gulp-util';
 import AutoPrefixer from 'autoprefixer';
-import WebpackNotifierPlugin from 'webpack-notifier';
 import BowerWebpackPlugin from 'bower-webpack-plugin';
 import ProgressBarPlugin from 'progress-bar-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
 // Built-in modules
-import isWatch from './modules/IsWatch';
 import isWindows from  './modules/isWindows';
 import isVersion from './modules/IsVersioning';
 import ManifestRevisionPlugin from './modules/RevManifestPlugin';
 
 const
-    config = elixir.config,
-    $ = elixir.Plugins,
     filenamePattern = isVersion()
         ? '[name]-[hash]'
         : '[name]';
 
 const webpack_config = {
-    debug: !config.production,
-    context: path.resolve(root.path, config.get('assets.js.folder')),
+    debug: !Elixir.inProduction,
+    context: path.resolve(root.path, Elixir.config.get('assets.js.folder')),
     plugins: [
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
@@ -35,7 +31,7 @@ const webpack_config = {
         }),
         new webpack.DefinePlugin({
             'process.env': {
-                'NODE_ENV': JSON.stringify(config.production ? 'production' : 'development')
+                'NODE_ENV': JSON.stringify(Elixir.inProduction ? 'production' : 'development')
             }
         }),
         new ProgressBarPlugin(),
@@ -43,19 +39,14 @@ const webpack_config = {
         new ExtractTextPlugin(`${filenamePattern}.css`, {allChunks: true}),
         new BowerWebpackPlugin({
             excludes: [/.*\.less$/, /^.+\/[^\/]+\/?\*$/]
-        }),
-        new WebpackNotifierPlugin({
-            excludeWarnings: true,
-            title: 'Laravel Elixir',
-            contentImage: path.resolve(root.path, 'node_modules', 'laravel-elixir', 'icons', 'laravel.png')
         })
     ],
     resolve: {
         extensions: ['', '.js']
     },
     output: {
-        path: path.resolve(root.path, config.get('public.js.outputFolder')),
-        publicPath: `/${config.js.outputFolder}/`,
+        path: path.resolve(root.path, Elixir.config.get('public.js.outputFolder')),
+        publicPath: `/${Elixir.config.js.outputFolder}/`,
         filename: `${filenamePattern}.js`
     },
     resolveLoader: {
@@ -114,7 +105,7 @@ const webpack_config = {
         ]
     },
     stats: {
-        colors: $.util.colors.supportsColor
+        colors: gutils.colors.supportsColor
     },
     postcss() {
         return [AutoPrefixer({browsers: ['last 2 versions']})];
@@ -124,7 +115,7 @@ const webpack_config = {
 /**
  * Production Environment
  */
-if (config.production) {
+if (Elixir.inProduction) {
     webpack_config.devtool = null;
 
     // Output stats
@@ -162,8 +153,8 @@ if (config.production) {
 /**
  * Development mode only
  */
-if (!config.production) {
-    webpack_config.devtool = 'cheap-module-eval-source-map';
+if (!Elixir.inProduction) {
+    webpack_config.devtool = 'eval-cheap-module-source-map';
 }
 
 /**
@@ -173,16 +164,16 @@ if (isVersion()) {
     // Versioning files should be in version build folder
     webpack_config.output.path = path.resolve(
         root.path,
-        config.publicPath,
-        config.versioning.buildFolder,
-        config.js.outputFolder
+        Elixir.config.publicPath,
+        Elixir.config.versioning.buildFolder,
+        Elixir.config.js.outputFolder
     );
 
     // Versioning plugin
     webpack_config.plugins.push(
         new ManifestRevisionPlugin(
             webpack_config.output.publicPath,
-            config.get('public.versioning.buildFolder')
+            Elixir.config.get('public.versioning.buildFolder')
         )
     );
 }
@@ -191,7 +182,7 @@ if (isVersion()) {
  * Switching on specific plugin(s) when webpack task
  * triggered in standalone mode "gulp webpack" or simple "gulp"
  */
-if (!isWatch()) {
+if (!Elixir.isWatching()) {
     // [should be the first in plugins array]
     webpack_config.plugins.unshift(
         // AutoClean plugin
