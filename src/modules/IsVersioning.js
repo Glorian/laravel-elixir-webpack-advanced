@@ -1,13 +1,10 @@
 "use strict";
 
-const
-    _ = require('lodash'),
-    elixir = require('laravel-elixir'),
-    config = elixir.config;
+import {get} from 'lodash';
 
 /**
  * Check if versioning enabled
  *
  * @returns {boolean}
  */
-export default () => config.production && _.get(config, 'versioning.enabled', false);
+export default () => Elixir.inProduction && get(Elixir.config, 'versioning.enabled', false);
