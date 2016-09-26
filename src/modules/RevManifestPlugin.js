@@ -1,6 +1,7 @@
 "use strict";
 
-import {merge, isArray, forEach, forOwn} from 'lodash';
+
+import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import mkpath from './MkPath';
@@ -18,7 +19,7 @@ const mergeManifestFiles = (manifestObject, filePath) => {
     }
 
     try {
-        return merge(JSON.parse(fs.readFileSync(filePath)), manifestObject);
+        return _.merge(JSON.parse(fs.readFileSync(filePath)), manifestObject);
     } catch (ex) {
         return manifestObject;
     }
@@ -50,8 +51,8 @@ export default function (publicPath, targetPath, filename) {
              * @returns {string}
              */
             const buildManifestHandler = (value, key) => {
-                if (isArray(value)) {
-                    forEach(value, value => buildManifestHandler(value, key));
+                if (_.isArray(value)) {
+                    _.forEach(value, value => buildManifestHandler(value, key));
                 } else {
                     const originalFileName = `${key}${path.extname(value)}`;
 
@@ -59,7 +60,7 @@ export default function (publicPath, targetPath, filename) {
                 }
             };
 
-            forOwn(stats.toJson().assetsByChunkName, buildManifestHandler);
+            _.forOwn(stats.toJson().assetsByChunkName, buildManifestHandler);
 
             manifest = mergeManifestFiles(manifest, filePath);
 

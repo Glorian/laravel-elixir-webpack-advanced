@@ -3,28 +3,30 @@
 /**
  * Require main dependencies
  */
-import {isPlainObject, mergeWith, isArray} from 'lodash';
-import webpack from 'webpack-stream';
-import compiler from 'webpack';
+import _ from 'lodash';
+import webpack from 'webpack';
+import elixir from 'laravel-elixir';
+import webpackConfig from './Config';
 
 /**
  * Built-in modules
  */
-import GulpPaths from './modules/GulpPaths';
+import isWatch from './modules/IsWatch';
+import { GulpPaths, versionPath } from './modules/GulpPaths';
 import isVersion from './modules/IsVersioning';
-import versionPath from './modules/VersionPath';
 import prepareEntry from './modules/EntryPaths';
-import webpackConfig from './Config';
 
 /**
  * Helpers
  */
-const taskName = 'webpack';
+const
+    $ = elixir.Plugins,
+    taskName = 'webpack';
 
 /**
  * Webpack spec
  */
-Elixir.extend(taskName, function (src, options, globalVars) {
+elixir.extend(taskName, function (src, options, globalVars) {
     let paths = GulpPaths(src),
         globalConfig = Object.assign({}, webpackConfig),
         entry = prepareEntry(src);
@@ -33,17 +35,17 @@ Elixir.extend(taskName, function (src, options, globalVars) {
      * In next major release this will be removed
      * TODO mark as deprecated
      */
-    if (isPlainObject(globalVars)) {
-        webpackConfig.plugins.push(new compiler.ProvidePlugin(globalVars));
+    if (_.isPlainObject(globalVars)) {
+        webpackConfig.plugins.push(new webpack.ProvidePlugin(globalVars));
     }
 
     // Merge options
-    options = mergeWith(
+    options = _.mergeWith(
         globalConfig,
         options,
-        {entry, watch: Elixir.isWatching()},
+        {entry, watch: isWatch()},
         (objValue, srcValue) => {
-            if (isArray(objValue)) {
+            if (_.isArray(objValue)) {
                 return objValue.concat(srcValue);
             }
         }
@@ -56,18 +58,15 @@ Elixir.extend(taskName, function (src, options, globalVars) {
     /**
      * Webpack task
      */
-    new Elixir.Task(taskName, function () {
+    new elixir.Task(taskName, function () {
         this.recordStep !== undefined && this.recordStep('Building js files');
 
-        this.output.baseDir = options.output.path;
+        webpack(options, (err, stats) => {
+            if (err) {
+                return;
+            }
 
-        return (
-            gulp
-                .src(this.src.path)
-                .pipe(webpack(options))
-                .on('error', this.onError())
-                .pipe(this.saveAs(gulp))
-                .pipe(this.onSuccess())
-        );
+            $.util.log(stats.toString(webpackConfig.stats));
+        });
     }, paths);
 });
