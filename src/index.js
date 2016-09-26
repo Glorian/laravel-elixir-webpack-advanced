@@ -4,8 +4,8 @@
  * Require main dependencies
  */
 import {isPlainObject, mergeWith, isArray} from 'lodash';
-import webpack from 'webpack-stream';
-import compiler from 'webpack';
+import gutils from 'gulp-util';
+import webpack from 'webpack';
 
 /**
  * Built-in modules
@@ -34,7 +34,7 @@ Elixir.extend(taskName, function (src, options, globalVars) {
      * TODO mark as deprecated
      */
     if (isPlainObject(globalVars)) {
-        webpackConfig.plugins.push(new compiler.ProvidePlugin(globalVars));
+        globalConfig.plugins.push(new webpack.ProvidePlugin(globalVars));
     }
 
     // Merge options
@@ -59,15 +59,12 @@ Elixir.extend(taskName, function (src, options, globalVars) {
     new Elixir.Task(taskName, function () {
         this.recordStep !== undefined && this.recordStep('Building js files');
 
-        this.output.baseDir = options.output.path;
+        webpack(options, (err, stats) => {
+            if (err) {
+                return;
+            }
 
-        return (
-            gulp
-                .src(this.src.path)
-                .pipe(webpack(options))
-                .on('error', this.onError())
-                .pipe(this.saveAs(gulp))
-                .pipe(this.onSuccess())
-        );
+            gutils.log(stats.toString(options.stats));
+    });
     }, paths);
 });
